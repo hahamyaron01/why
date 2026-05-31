@@ -1410,6 +1410,8 @@ function autoAddToCalendar(msg) {
 }
 
 // ── GOOGLE CALENDAR AUTO ───────────────────────────────────
+
+function escAttr(s) {
   return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');
 }
 
