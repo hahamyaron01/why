@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaroSend</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TaroSend">
+<meta name="theme-color" content="#25D366">
+<link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22TaroSend%22%2C%22short_name%22%3A%22TaroSend%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230a0f0a%22%2C%22theme_color%22%3A%22%2325D366%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%2527http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%2527%2520viewBox%3D%25270%25200%2520512%2520512%2527%253E%253Crect%2520width%3D%2527512%2527%2520height%3D%2527512%2527%2520rx%3D%2527100%2527%2520fill%3D%2527%252325D366%2527%2F%253E%253Ctext%2520x%3D%2527256%2527%2520y%3D%2527340%2527%2520font-size%3D%2527280%2527%2520text-anchor%3D%2527middle%2527%2520fill%3D%2527white%2527%253E%25F0%259F%2592%25AC%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%2325D366'/%3E%3Ctext x='256' y='340' font-size='280' text-anchor='middle' fill='white'%3E%F0%9F%92%AC%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0a;
+    --surface: #111811;
+    --surface2: #182018;
+    --border: #1e2e1e;
+    --green: #25D366;
+    --green-dim: #1a9e4a;
+    --green-glow: rgba(37,211,102,0.15);
+    --text: #e8f5e8;
+    --text-muted: #6b8f6b;
+    --text-dim: #3a5a3a;
+    --red: #ff4d4d;
+    --yellow: #f5c842;
+    --blue: #64a0ff;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    direction: rtl;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(37,211,102,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 80% 80%, rgba(37,211,102,0.03) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px 16px 100px;
+  }
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-icon {
+    width: 44px; height: 44px;
+    background: var(--green);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 20px rgba(37,211,102,0.3);
+    flex-shrink: 0;
+  }
+  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .header p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 24px;
+    background: var(--surface);
+    padding: 5px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  .tab {
+    flex: 1;
+    padding: 9px 4px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Heebo', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .tab.active { background: var(--green); color: #000; box-shadow: 0 2px 12px rgba(37,211,102,0.3); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  input, textarea, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: 'Heebo', sans-serif;
+    font-size: 15px;
+    direction: rtl;
+    margin-bottom: 14px;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--green-dim);
+    box-shadow: 0 0 0 3px var(--green-glow);
+  }
+  textarea { resize: vertical; min-height: 100px; }
+  select option { background: #1a2a1a; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  /* Recipients */
+  .recipient-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .recipient-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-size: 13px;
+    user-select: none;
+  }
+  .recipient-chip:hover { border-color: var(--green-dim); }
+  .recipient-chip.selected { background: var(--green-glow); border-color: var(--green); color: var(--green); }
+  .recipient-chip .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .avatar.contact { background: rgba(37,211,102,0.2); color: var(--green); }
+  .avatar.group { background: rgba(100,160,255,0.2); color: var(--blue); }
+  /* Schedule mode toggle */
+  .mode-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .mode-btn {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-family: 'Heebo', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+  }
+  .mode-btn.active { background: var(--green-glow); border-color: var(--green); color: var(--green); }
+  /* Days of week */
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .day-btn {
+    padding: 8px 4px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-family: 'Heebo', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+    user-select: none;
+  }
+  .day-btn:hover { border-color: var(--green-dim); color: var(--text); }
+  .day-btn.selected { background: var(--green-glow); border-color: var(--green); color: var(--green); }
+  .day-btn.shabbat { border-color: rgba(245,200,66,0.3); color: #f5c842; }
+  .day-btn.shabbat.selected { background: rgba(245,200,66,0.1); border-color: var(--yellow); }
+  /* Pills */
+  .pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .pill {
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.18s;
+    user-select: none;
+  }
+  .pill:hover { border-color: var(--green-dim); color: var(--text); }
+  .pill.selected { background: var(--green-glow); border-color: var(--green); color: var(--green); font-weight: 600; }
+  /* Buttons */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Heebo', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--green); color: #000; box-shadow: 0 4px 20px rgba(37,211,102,0.25); }
+  .btn-primary:hover { background: #1fbd5a; box-shadow: 0 4px 28px rgba(37,211,102,0.4); transform: translateY(-1px); }
+  .btn-sm { width: auto; padding: 7px 14px; font-size: 13px; border-radius: 8px; }
+  .btn-danger { background: rgba(255,77,77,0.15); color: var(--red); border: 1px solid rgba(255,77,77,0.3); }
+  .btn-ghost { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-send { background: var(--green); color: #000; border: none; }
+  /* Message cards */
+  .msg-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .msg-card.overdue { border-color: rgba(255,77,77,0.4); background: rgba(255,77,77,0.04); }
+  .msg-card.due-now { border-color: var(--green); background: var(--green-glow); animation: pulse-border 1.5s infinite; }
+  @keyframes pulse-border {
+    0%,100% { box-shadow: 0 0 0 0 rgba(37,211,102,0.3); }
+    50% { box-shadow: 0 0 0 6px rgba(37,211,102,0); }
+  }
+  .msg-time { font-size: 14px; font-weight: 700; }
+  .msg-time.overdue { color: var(--red); }
+  .msg-time.due-now { color: var(--green); }
+  .msg-recipients { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .recipient-badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .badge-contact { background: rgba(37,211,102,0.12); color: var(--green); }
+  .badge-group { background: rgba(100,160,255,0.12); color: var(--blue); }
+  .msg-body {
+    font-size: 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 10px;
+    margin: 10px 0;
+    border-right: 3px solid var(--border);
+  }
+  .msg-recurrence { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+  .msg-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .status-badge { padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+  .status-pending { background: rgba(245,200,66,0.15); color: var(--yellow); }
+  .status-due { background: rgba(37,211,102,0.2); color: var(--green); }
+  .status-overdue { background: rgba(255,77,77,0.15); color: var(--red); }
+  .status-sent { background: rgba(100,100,100,0.2); color: #888; }
+  .countdown { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .countdown.soon { color: var(--green); font-weight: 600; }
+  /* Contacts */
+  .contact-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+  .contact-row .avatar { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+  .contact-info { flex: 1; min-width: 0; }
+  .contact-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .contact-phone { font-size: 12px; color: var(--text-muted); direction: ltr; }
+  .section-divider { font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; margin: 8px 0 10px; }
+  .empty { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+  .empty p { font-size: 15px; }
+  .count-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; background: var(--green); color: #000; border-radius: 50%; font-size: 11px; font-weight: 800; margin-right: 4px; }
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+  .filter-bar select { flex: 1; margin-bottom: 0; font-size: 13px; padding: 9px 12px; }
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 500;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px 20px 0 0;
+    padding: 24px;
+    width: 100%;
+    max-width: 700px;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slide-up 0.25s ease;
+  }
+  @keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--green);
+    color: #000;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 14px;
+    z-index: 999;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    white-space: nowrap;
+    box-shadow: 0 8px 30px rgba(37,211,102,0.4);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: var(--red); color: #fff; }
+  /* Weekly schedule preview */
+  .week-preview {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 12px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+  .week-preview strong { color: var(--green); }
+  /* Time input no-mb */
+  .no-mb { margin-bottom: 0 !important; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="header-icon">💬</div>
+    <div>
+      <h1>TaroSend</h1>
+      <p>שלח הודעות בלחיצה אחת בשעה הנכונה</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('schedule')">📅 תזמון</button>
+    <button class="tab" onclick="switchTab('list')">📋 ממתינות <span id="pending-count"></span></button>
+    <button class="tab" onclick="switchTab('contacts')">👥 אנשי קשר</button>
+  </div>
+
+  <!-- TAB: Schedule -->
+  <div id="tab-schedule" class="panel active">
+
+    <div class="card">
+      <div class="card-title">📝 ההודעה</div>
+      <label>תוכן ההודעה</label>
+      <textarea id="msg-text" placeholder="כתוב כאן את ההודעה..."></textarea>
+    </div>
+
+    <div class="card">
+      <div class="card-title">👤 נמענים</div>
+      <div id="recipients-grid" class="recipient-grid"></div>
+      <div style="font-size:12px;color:var(--text-muted)">הוסף אנשי קשר בלשונית "אנשי קשר"</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⏰ מתי לשלוח?</div>
+
+      <!-- Mode toggle -->
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="mode-date-btn" onclick="setMode('date')">📅 תאריך ספציפי</button>
+        <button class="mode-btn" id="mode-weekly-btn" onclick="setMode('weekly')">🗓 ימים בשבוע</button>
+      </div>
+
+      <!-- MODE: specific date -->
+      <div id="mode-date">
+        <div class="row">
+          <div>
+            <label>תאריך</label>
+            <input type="date" id="msg-date">
+          </div>
+          <div>
+            <label>שעה</label>
+            <div style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:14px;direction:ltr;" id="time-date-wrap">
+              <input type="number" id="msg-hour-date" min="0" max="23" placeholder="08"
+                style="width:44px;background:transparent;border:none;padding:2px 0;margin:0;font-size:20px;font-weight:700;text-align:center;color:var(--text);-moz-appearance:textfield;"
+                oninput="this.value=this.value.slice(0,2);updateTimeDatePreview()"
+                onfocus="document.getElementById('time-date-wrap').style.borderColor='var(--green-dim)'"
+                onblur="padTime(this);document.getElementById('time-date-wrap').style.borderColor='var(--border)'">
+              <span style="font-size:22px;font-weight:700;color:var(--text-muted)">:</span>
+              <input type="number" id="msg-min-date" min="0" max="59" placeholder="00"
+                style="width:44px;background:transparent;border:none;padding:2px 0;margin:0;font-size:20px;font-weight:700;text-align:center;color:var(--text);-moz-appearance:textfield;"
+                oninput="this.value=this.value.slice(0,2);updateTimeDatePreview()"
+                onfocus="document.getElementById('time-date-wrap').style.borderColor='var(--green-dim)'"
+                onblur="padTime(this);document.getElementById('time-date-wrap').style.borderColor='var(--border)'">
+              <span id="time-date-preview" style="font-size:12px;color:var(--text-muted);margin-right:auto"></span>
+            </div>
+          </div>
+        </div>
+        <label>חזרתיות</label>
+        <div class="pills" id="recurrence-pills">
+          <span class="pill selected" data-val="none" onclick="selectRecurrence(this)">חד פעמי</span>
+          <span class="pill" data-val="daily" onclick="selectRecurrence(this)">יומי</span>
+          <span class="pill" data-val="weekly" onclick="selectRecurrence(this)">שבועי</span>
+          <span class="pill" data-val="monthly" onclick="selectRecurrence(this)">חודשי</span>
+        </div>
+      </div>
+
+      <!-- MODE: days of week -->
+      <div id="mode-weekly" style="display:none">
+        <label>בחר ימים בשבוע</label>
+        <div class="days-grid">
+          <button class="day-btn" data-day="0" onclick="toggleDay(this)">א'</button>
+          <button class="day-btn" data-day="1" onclick="toggleDay(this)">ב'</button>
+          <button class="day-btn" data-day="2" onclick="toggleDay(this)">ג'</button>
+          <button class="day-btn" data-day="3" onclick="toggleDay(this)">ד'</button>
+          <button class="day-btn" data-day="4" onclick="toggleDay(this)">ה'</button>
+          <button class="day-btn shabbat" data-day="5" onclick="toggleDay(this)">ו'</button>
+          <button class="day-btn shabbat" data-day="6" onclick="toggleDay(this)">ש'</button>
+        </div>
+        <label>שעת שליחה</label>
+        <div style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:14px;direction:ltr;" id="time-weekly-wrap">
+          <input type="number" id="msg-hour-weekly" min="0" max="23" placeholder="08"
+            style="width:44px;background:transparent;border:none;padding:2px 0;margin:0;font-size:20px;font-weight:700;text-align:center;color:var(--text);-moz-appearance:textfield;"
+            oninput="this.value=this.value.slice(0,2);updateWeekPreview()"
+            onfocus="document.getElementById('time-weekly-wrap').style.borderColor='var(--green-dim)'"
+            onblur="padTime(this);document.getElementById('time-weekly-wrap').style.borderColor='var(--border)'">
+          <span style="font-size:22px;font-weight:700;color:var(--text-muted)">:</span>
+          <input type="number" id="msg-min-weekly" min="0" max="59" placeholder="00"
+            style="width:44px;background:transparent;border:none;padding:2px 0;margin:0;font-size:20px;font-weight:700;text-align:center;color:var(--text);-moz-appearance:textfield;"
+            oninput="this.value=this.value.slice(0,2);updateWeekPreview()"
+            onfocus="document.getElementById('time-weekly-wrap').style.borderColor='var(--green-dim)'"
+            onblur="padTime(this);document.getElementById('time-weekly-wrap').style.borderColor='var(--border)'">
+        </div>
+        <div class="week-preview" id="week-preview" style="display:none"></div>
+        <div style="height:14px"></div>
+      </div>
+
+    </div>
+
+    <button class="btn btn-primary" onclick="scheduleMessage()">✅ תזמן הודעה</button>
+  </div>
+
+  <!-- TAB: List -->
+  <div id="tab-list" class="panel">
+    <div class="filter-bar">
+      <select id="filter-status" onchange="renderList()">
+        <option value="all">כל ההודעות</option>
+        <option value="pending">ממתינות</option>
+        <option value="overdue">באיחור</option>
+        <option value="sent">נשלחו</option>
+      </select>
+    </div>
+    <div id="messages-list"></div>
+  </div>
+
+  <!-- TAB: Contacts -->
+  <div id="tab-contacts" class="panel">
+    <div class="card">
+      <div class="card-title">הוסף איש קשר / קבוצה</div>
+      <div class="row">
+        <div>
+          <label>שם</label>
+          <input type="text" id="new-name" placeholder="שם מלא">
+        </div>
+        <div>
+          <label>סוג</label>
+          <select id="new-type" onchange="onTypeChange(this.value)">
+            <option value="contact">איש קשר</option>
+            <option value="group">קבוצה</option>
+          </select>
+        </div>
+      </div>
+      <div id="field-phone">
+        <label>מספר טלפון</label>
+        <input type="tel" id="new-phone" placeholder="972501234567">
+      </div>
+      <div id="field-link" style="display:none">
+        <label>לינק קבוצה (אופציונלי)</label>
+        <input type="url" id="new-link" placeholder="https://chat.whatsapp.com/...">
+        <div style="font-size:12px;color:var(--text-muted);margin-top:-10px;margin-bottom:12px">
+          בקבוצה → ⋮ → הוסף משתתפים → שתף לינק
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="addContact()">➕ הוסף</button>
+    </div>
+    <div id="contacts-list"></div>
+  </div>
+</div>
+
+<!-- Send Modal -->
+<div class="modal-overlay" id="send-modal">
+  <div class="modal">
+    <div class="modal-title">📤 שלח הודעה</div>
+    <div id="modal-content"></div>
+    <div style="margin-top:16px;display:flex;gap:8px;">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">סגור</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────
+var contacts = [];
+var messages = [];
+var selectedRecurrence = 'none';
+var selectedRecipients = {};
+var scheduleMode = 'date'; // 'date' | 'weekly'
+var selectedDays = {};
+
+var DAY_NAMES = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+var DAY_SHORT = ["א'","ב'","ג'","ד'","ה'","ו'","ש'"];
+
+// ── INIT ───────────────────────────────────────────────────
+function init() {
+  var raw = localStorage.getItem('wa_contacts');
+  contacts = raw ? JSON.parse(raw) : [];
+  var rawM = localStorage.getItem('wa_messages');
+  messages = rawM ? JSON.parse(rawM) : [];
+
+  if (contacts.length === 0) {
+    contacts = [
+      { id: 'c1', name: 'ד"ר כהן אברהם', phone: '972521234567', type: 'contact' },
+      { id: 'c2', name: 'רוקח לוי', phone: '972531234567', type: 'contact' },
+      { id: 'g1', name: 'צוות מכירות TARO', phone: '120363xxxxxxxx', type: 'group' },
+    ];
+    saveContacts();
+  }
+
+  var now = new Date();
+  now.setHours(now.getHours() + 1, 0, 0, 0);
+  document.getElementById('msg-date').value = now.toISOString().split('T')[0];
+  var hh = String(now.getHours()).padStart(2,'0');
+  var mm = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('msg-hour-date').value = hh;
+  document.getElementById('msg-min-date').value = mm;
+  document.getElementById('msg-hour-weekly').value = '08';
+  document.getElementById('msg-min-weekly').value = '00';
+  updateTimeDatePreview();
+
+  renderRecipients();
+  renderContacts();
+  renderList();
+  updatePendingCount();
+  setInterval(tickCheck, 30000);
+  tickCheck();
+  requestNotificationPermission();
+}
+
+function saveContacts() { localStorage.setItem('wa_contacts', JSON.stringify(contacts)); }
+function saveMessages() { localStorage.setItem('wa_messages', JSON.stringify(messages)); }
+
+// ── TABS ───────────────────────────────────────────────────
+function switchTab(tab) {
+  var tabMap = { schedule: 0, list: 1, contacts: 2 };
+  var tabBtns = document.querySelectorAll('.tabs .tab');
+  tabBtns.forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  if (tabBtns[tabMap[tab]]) tabBtns[tabMap[tab]].classList.add('active');
+  var panel = document.getElementById('tab-' + tab);
+  if (panel) panel.classList.add('active');
+  if (tab === 'list') renderList();
+  if (tab === 'contacts') renderContacts();
+}
+
+// ── MODE ───────────────────────────────────────────────────
+function setMode(mode) {
+  scheduleMode = mode;
+  document.getElementById('mode-date').style.display = mode === 'date' ? 'block' : 'none';
+  document.getElementById('mode-weekly').style.display = mode === 'weekly' ? 'block' : 'none';
+  document.getElementById('mode-date-btn').classList.toggle('active', mode === 'date');
+  document.getElementById('mode-weekly-btn').classList.toggle('active', mode === 'weekly');
+}
+
+// ── DAYS ───────────────────────────────────────────────────
+function toggleDay(btn) {
+  var d = btn.dataset.day;
+  if (selectedDays[d]) {
+    delete selectedDays[d];
+    btn.classList.remove('selected');
+  } else {
+    selectedDays[d] = true;
+    btn.classList.add('selected');
+  }
+  updateWeekPreview();
+}
+
+function updateWeekPreview() {
+  var preview = document.getElementById('week-preview');
+  var days = Object.keys(selectedDays).map(Number).sort();
+  if (days.length === 0) { preview.style.display = 'none'; return; }
+  var time = getTimeStr('msg-hour-weekly','msg-min-weekly');
+  var names = days.map(function(d) { return DAY_NAMES[d]; }).join(', ');
+  preview.style.display = 'block';
+  preview.innerHTML = 'ההודעה תשלח כל <strong>' + names + '</strong> בשעה <strong>' + time + '</strong>';
+}
+
+// ── RECIPIENTS ─────────────────────────────────────────────
+function renderRecipients() {
+  var grid = document.getElementById('recipients-grid');
+  if (contacts.length === 0) {
+    grid.innerHTML = '<div style="color:var(--text-muted);font-size:13px">הוסף אנשי קשר תחילה</div>';
+    return;
+  }
+  grid.innerHTML = contacts.map(function(c) {
+    var sel = selectedRecipients[c.id] ? 'selected' : '';
+    return '<div class="recipient-chip ' + sel + '" onclick="toggleRecipient(\'' + c.id + '\')">' +
+      '<div class="avatar ' + c.type + '">' + c.name.charAt(0) + '</div>' +
+      '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">' + escHtml(c.name) + '</span>' +
+      '</div>';
+  }).join('');
+}
+
+function toggleRecipient(id) {
+  if (selectedRecipients[id]) delete selectedRecipients[id];
+  else selectedRecipients[id] = true;
+  renderRecipients();
+}
+
+function padTime(el) {
+  if (el.value !== '') el.value = String(parseInt(el.value) || 0).padStart(2,'0');
+}
+
+function getTimeStr(hourId, minId) {
+  var h = String(parseInt(document.getElementById(hourId).value) || 0).padStart(2,'0');
+  var m = String(parseInt(document.getElementById(minId).value) || 0).padStart(2,'0');
+  return h + ':' + m;
+}
+
+function updateTimeDatePreview() {
+  var t = getTimeStr('msg-hour-date','msg-min-date');
+  document.getElementById('time-date-preview').textContent = t;
+}
+function selectRecurrence(el) {
+  document.querySelectorAll('#recurrence-pills .pill').forEach(function(p) { p.classList.remove('selected'); });
+  el.classList.add('selected');
+  selectedRecurrence = el.dataset.val;
+}
+
+// ── SCHEDULE ───────────────────────────────────────────────
+function scheduleMessage() {
+  var text = document.getElementById('msg-text').value.trim();
+  var recipIds = Object.keys(selectedRecipients);
+
+  if (!text) { showToast('כתוב הודעה תחילה', true); return; }
+  if (recipIds.length === 0) { showToast('בחר לפחות נמען אחד', true); return; }
+
+  if (scheduleMode === 'date') {
+    scheduleDateMode(text, recipIds);
+  } else {
+    scheduleWeeklyMode(text, recipIds);
+  }
+}
+
+function scheduleDateMode(text, recipIds) {
+  var date = document.getElementById('msg-date').value;
+  var time = getTimeStr('msg-hour-date','msg-min-date');
+  if (!date) { showToast('בחר תאריך', true); return; }
+
+  var scheduledAt = new Date(date + 'T' + time).getTime();
+  if (scheduledAt < Date.now() && selectedRecurrence === 'none') {
+    showToast('הזמן שנבחר כבר עבר', true); return;
+  }
+
+  var msg = {
+    id: 'msg_' + Date.now(),
+    text: text,
+    recipients: recipIds,
+    scheduledAt: scheduledAt,
+    recurrence: selectedRecurrence,
+    scheduleType: 'date',
+    status: 'pending',
+    createdAt: Date.now()
+  };
+  messages.push(msg);
+  saveMessages();
+  afterSchedule();
+}
+
+function scheduleWeeklyMode(text, recipIds) {
+  var days = Object.keys(selectedDays).map(Number).sort();
+  var time = getTimeStr('msg-hour-weekly','msg-min-weekly');
+  if (days.length === 0) { showToast('בחר לפחות יום אחד', true); return; }
+  if (!time) { showToast('בחר שעה', true); return; }
+
+  // Create next occurrence for each selected day
+  var created = 0;
+  days.forEach(function(day) {
+    var nextTs = nextOccurrence(day, time);
+    var msg = {
+      id: 'msg_' + Date.now() + '_' + day,
+      text: text,
+      recipients: recipIds,
+      scheduledAt: nextTs,
+      recurrence: 'weekly',
+      scheduleType: 'weekly',
+      weekDay: day,
+      weekTime: time,
+      status: 'pending',
+      createdAt: Date.now()
+    };
+    messages.push(msg);
+    created++;
+  });
+
+  saveMessages();
+  afterSchedule(created);
+}
+
+function nextOccurrence(dayOfWeek, timeStr) {
+  // dayOfWeek: 0=Sun, 1=Mon, ..., 6=Sat (Israeli: 0=Sun)
+  var parts = timeStr.split(':');
+  var h = parseInt(parts[0]);
+  var m = parseInt(parts[1]);
+  var now = new Date();
+  var d = new Date();
+  d.setHours(h, m, 0, 0);
+
+  var currentDay = now.getDay(); // 0=Sun
+  var diff = dayOfWeek - currentDay;
+  if (diff < 0) diff += 7;
+  if (diff === 0 && d <= now) diff = 7; // already passed today
+
+  d.setDate(d.getDate() + diff);
+  return d.getTime();
+}
+
+function afterSchedule(count) {
+  count = count || 1;
+  document.getElementById('msg-text').value = '';
+  selectedRecipients = {};
+  selectedDays = {};
+  document.querySelectorAll('.day-btn').forEach(function(b) { b.classList.remove('selected'); });
+  document.getElementById('week-preview').style.display = 'none';
+  renderRecipients();
+  updatePendingCount();
+  showToast('✅ ' + (count > 1 ? count + ' הודעות תוזמנו!' : 'ההודעה תוזמנה!'));
+  setTimeout(function() { switchTab('list'); }, 800);
+}
+
+// ── RENDER LIST ────────────────────────────────────────────
+function renderList() {
+  var filter = document.getElementById('filter-status').value;
+  var now = Date.now();
+  var container = document.getElementById('messages-list');
+
+  var filtered = messages.filter(function(m) {
+    if (filter === 'pending') return m.status === 'pending' && m.scheduledAt > now;
+    if (filter === 'overdue') return m.status === 'pending' && m.scheduledAt <= now;
+    if (filter === 'sent') return m.status === 'sent';
+    return true;
+  });
+
+  filtered.sort(function(a,b) { return a.scheduledAt - b.scheduledAt; });
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><p>אין הודעות להצגה</p></div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(function(msg) {
+    var isOverdue = msg.status === 'pending' && msg.scheduledAt < now;
+    var isDue = msg.status === 'pending' && msg.scheduledAt <= now + 60000 && msg.scheduledAt > now - 300000;
+    var d = new Date(msg.scheduledAt);
+    var dateStr = d.toLocaleDateString('he-IL', { weekday:'short', day:'numeric', month:'short' });
+    var timeStr = d.toLocaleTimeString('he-IL', { hour:'2-digit', minute:'2-digit' });
+
+    var recipNames = msg.recipients.map(function(id) {
+      var c = contacts.find(function(x) { return x.id === id; });
+      return c ? '<span class="recipient-badge badge-' + c.type + '">' + escHtml(c.name) + '</span>' : '';
+    }).join(' ');
+
+    var recLabel = '';
+    if (msg.scheduleType === 'weekly' && msg.weekDay !== undefined) {
+      recLabel = '🔁 כל ' + DAY_NAMES[msg.weekDay] + ' ' + (msg.weekTime || '');
+    } else if (msg.recurrence === 'daily') recLabel = '🔁 יומי';
+    else if (msg.recurrence === 'weekly') recLabel = '🔁 שבועי';
+    else if (msg.recurrence === 'monthly') recLabel = '🔁 חודשי';
+
+    var statusBadge = '';
+    if (msg.status === 'sent') statusBadge = '<span class="status-badge status-sent">✓ נשלח</span>';
+    else if (isOverdue) statusBadge = '<span class="status-badge status-overdue">⚠ באיחור</span>';
+    else if (isDue) statusBadge = '<span class="status-badge status-due">🔔 עכשיו!</span>';
+    else statusBadge = '<span class="status-badge status-pending">⏳ ממתין</span>';
+
+    var countdown = msg.status === 'pending' ? getCountdown(msg.scheduledAt) : '';
+
+    var calBtn = '';
+    if (msg.status === 'pending') {
+      calBtn = '<button class="btn btn-ghost btn-sm" onclick="addToCalendar(\'' + msg.id + '\')">📅 תזכורת</button>';
+    }
+
+    return '<div class="msg-card ' + (isOverdue?'overdue':'') + ' ' + (isDue?'due-now':'') + '">' +
+      '<div class="msg-time ' + (isOverdue?'overdue':'') + ' ' + (isDue?'due-now':'') + '">' + dateStr + ' · ' + timeStr + ' ' + statusBadge + '</div>' +
+      '<div class="msg-recipients">' + recipNames + '</div>' +
+      (countdown ? '<div class="countdown ' + (isDue?'soon':'') + '">' + countdown + '</div>' : '') +
+      '<div class="msg-body">' + escHtml(msg.text) + '</div>' +
+      (recLabel ? '<div class="msg-recurrence">' + recLabel + '</div>' : '') +
+      '<div class="msg-actions">' +
+        (msg.status === 'pending' ? '<button class="btn btn-send btn-sm" onclick="openSendModal(\'' + msg.id + '\')">📤 שלח עכשיו</button>' : '') +
+        calBtn +
+        (msg.status === 'sent' ? '<button class="btn btn-ghost btn-sm" onclick="resendMsg(\'' + msg.id + '\')">🔄 שלח שוב</button>' : '') +
+        '<button class="btn btn-danger btn-sm" onclick="deleteMsg(\'' + msg.id + '\')">🗑 מחק</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+function getCountdown(ts) {
+  var diff = ts - Date.now();
+  if (diff < 0) return 'עבר לפני ' + fmtDur(-diff);
+  if (diff < 60000) return 'עוד פחות מדקה!';
+  return 'עוד ' + fmtDur(diff);
+}
+function fmtDur(ms) {
+  var m = Math.floor(ms/60000), h = Math.floor(m/60), d = Math.floor(h/24);
+  if (d > 0) return d + ' ימים ו-' + (h%24) + ' שעות';
+  if (h > 0) return h + ' שעות ו-' + (m%60) + ' דקות';
+  return m + ' דקות';
+}
+
+// ── SEND MODAL ─────────────────────────────────────────────
+function openSendModal(msgId) {
+  var msg = messages.find(function(m) { return m.id === msgId; });
+  if (!msg) return;
+  var recipContacts = msg.recipients.map(function(id) {
+    return contacts.find(function(c) { return c.id === id; });
+  }).filter(Boolean);
+  var encodedText = encodeURIComponent(msg.text);
+  var plainText = msg.text;
+
+  // Step 1: big copy button
+  var copyBtn = '<button id="copy-btn" onclick="doCopy(this,\'' + escAttr(plainText) + '\')" ' +
+    'style="width:100%;padding:16px;background:var(--surface2);border:2px dashed var(--green);border-radius:12px;' +
+    'color:var(--green);font-family:Heebo,sans-serif;font-size:17px;font-weight:700;cursor:pointer;margin-bottom:14px;transition:all 0.2s">' +
+    '📋 שלב 1 — העתק הודעה</button>';
+
+  // Step 2: one row per recipient
+  var rows = recipContacts.map(function(c) {
+    var isGroup = c.type === 'group';
+    var hasLink = isGroup && c.groupLink && c.groupLink.length > 10;
+    var openUrl;
+    if (!isGroup) {
+      openUrl = 'https://wa.me/' + c.phone + '?text=' + encodedText;
+    } else if (hasLink) {
+      openUrl = c.groupLink;
+    } else {
+      openUrl = 'https://api.whatsapp.com/send';
+    }
+
+    var subtitle = !isGroup
+      ? '<span style="direction:ltr;display:inline-block;font-size:12px;color:var(--text-muted)">' + c.phone + '</span>'
+      : (hasLink
+          ? '<span style="font-size:11px;color:var(--blue)">✓ יש לינק</span>'
+          : '<span style="font-size:11px;color:var(--text-muted)">הדבק בקבוצה ידנית</span>');
+
+    return '<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:10px;margin-bottom:8px;">' +
+      '<div class="avatar ' + c.type + '" style="width:36px;height:36px;flex-shrink:0">' + c.name.charAt(0) + '</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-weight:600;font-size:14px">' + escHtml(c.name) + '</div>' +
+        subtitle +
+      '</div>' +
+      '<a href="' + openUrl + '" target="_blank" ' +
+        'style="background:var(--surface);color:var(--text-muted);padding:8px 14px;border-radius:8px;text-decoration:none;' +
+        'font-weight:700;font-size:13px;white-space:nowrap;flex-shrink:0;border:1px solid var(--border)" ' +
+        'id="open-btn-' + c.id + '">' +
+        '📤 שלב 2 — פתח</a>' +
+      '</div>';
+  }).join('');
+
+  // Message preview
+  var preview = '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;">' +
+    '<div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;font-weight:700;letter-spacing:1px">ההודעה</div>' +
+    '<div style="font-size:14px;white-space:pre-wrap;word-break:break-word;line-height:1.5">' + escHtml(plainText) + '</div>' +
+    '</div>';
+
+  document.getElementById('modal-content').innerHTML =
+    preview + copyBtn +
+    '<div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;text-align:center">לאחר ההעתקה — לחץ פתח והדבק</div>' +
+    rows +
+    '<div style="margin-top:16px"><button class="btn btn-primary" onclick="markAllSent(\'' + msgId + '\');closeModal()">✅ סמן הכל כנשלח</button></div>';
+
+  document.getElementById('send-modal').classList.add('open');
+}
+
+function doCopy(btn, text) {
+  try {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0.01;font-size:16px;';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    ta.setSelectionRange(0, 99999);
+    var ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (ok) {
+      btn.textContent = '✅ הועתק! עכשיו לחץ פתח למטה';
+      btn.style.background = 'var(--green-glow)';
+      btn.style.borderStyle = 'solid';
+      // highlight open buttons
+      document.querySelectorAll('[id^="open-btn-"]').forEach(function(el) {
+        el.style.background = 'var(--green)';
+        el.style.color = '#000';
+        el.style.borderColor = 'var(--green)';
+      });
+    } else {
+      btn.textContent = '⚠ לא הצליח — העתק ידנית מהתצוגה למעלה';
+    }
+  } catch(e) {
+    btn.textContent = '⚠ לא הצליח — העתק ידנית מהתצוגה למעלה';
+  }
+}
+
+function addToCalendar(msgId) {
+  var msg = messages.find(function(m) { return m.id === msgId; });
+  if (!msg) return;
+
+  var d = new Date(msg.scheduledAt);
+  // end = start + 15 min
+  var dEnd = new Date(msg.scheduledAt + 15 * 60000);
+
+  function pad(n) { return String(n).padStart(2,'0'); }
+  function gcalDate(dt) {
+    return dt.getFullYear() +
+      pad(dt.getMonth()+1) +
+      pad(dt.getDate()) + 'T' +
+      pad(dt.getHours()) +
+      pad(dt.getMinutes()) + '00';
+  }
+
+  var recipNames = msg.recipients.map(function(id) {
+    var c = contacts.find(function(x) { return x.id === id; });
+    return c ? c.name : '';
+  }).filter(Boolean).join(', ');
+
+  var title = encodeURIComponent('📤 שלח WhatsApp — ' + recipNames);
+  var details = encodeURIComponent('הודעה לשליחה:\n\n' + msg.text);
+  var start = gcalDate(d);
+  var end = gcalDate(dEnd);
+
+  // recurrence
+  var recur = '';
+  if (msg.scheduleType === 'weekly' || msg.recurrence === 'weekly') {
+    recur = '&recur=RRULE:FREQ%3DWEEKLY';
+  } else if (msg.recurrence === 'daily') {
+    recur = '&recur=RRULE:FREQ%3DDAILY';
+  } else if (msg.recurrence === 'monthly') {
+    recur = '&recur=RRULE:FREQ%3DMONTHLY';
+  }
+
+  var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+    '&text=' + title +
+    '&dates=' + start + '/' + end +
+    '&details=' + details +
+    recur;
+
+  window.open(url, '_blank');
+}
+
+function escAttr(s) {
+  return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');
+}
+
+function closeModal() { document.getElementById('send-modal').classList.remove('open'); }
+
+function markAllSent(msgId) {
+  var msg = messages.find(function(m) { return m.id === msgId; });
+  if (!msg) return;
+  msg.status = 'sent';
+  msg.sentAt = Date.now();
+
+  // Schedule next occurrence
+  if (msg.scheduleType === 'weekly' && msg.weekDay !== undefined) {
+    var next = JSON.parse(JSON.stringify(msg));
+    next.id = 'msg_' + Date.now();
+    next.scheduledAt = nextOccurrence(msg.weekDay, msg.weekTime || '08:00');
+    next.status = 'pending';
+    delete next.sentAt;
+    messages.push(next);
+  } else if (msg.recurrence !== 'none') {
+    var d = new Date(msg.scheduledAt);
+    if (msg.recurrence === 'daily') d.setDate(d.getDate() + 1);
+    else if (msg.recurrence === 'weekly') d.setDate(d.getDate() + 7);
+    else if (msg.recurrence === 'monthly') d.setMonth(d.getMonth() + 1);
+    var next2 = JSON.parse(JSON.stringify(msg));
+    next2.id = 'msg_' + Date.now();
+    next2.scheduledAt = d.getTime();
+    next2.status = 'pending';
+    delete next2.sentAt;
+    messages.push(next2);
+  }
+
+  saveMessages();
+  renderList();
+  updatePendingCount();
+  showToast('✅ סומן כנשלח');
+}
+
+function resendMsg(msgId) {
+  var msg = messages.find(function(m) { return m.id === msgId; });
+  if (!msg) return;
+  msg.status = 'pending';
+  delete msg.sentAt;
+  saveMessages();
+  renderList();
+  showToast('ההודעה הוחזרה לתור');
+}
+
+function deleteMsg(msgId) {
+  messages = messages.filter(function(m) { return m.id !== msgId; });
+  saveMessages();
+  renderList();
+  updatePendingCount();
+  showToast('ההודעה נמחקה');
+}
+
+// ── CONTACTS ───────────────────────────────────────────────
+function onTypeChange(val) {
+  document.getElementById('field-phone').style.display = val === 'contact' ? 'block' : 'none';
+  document.getElementById('field-link').style.display = val === 'group' ? 'block' : 'none';
+}
+
+function addContact() {
+  var name = document.getElementById('new-name').value.trim();
+  var type = document.getElementById('new-type').value;
+  var phone = type === 'contact' ? document.getElementById('new-phone').value.trim().replace(/\D/g,'') : '';
+  var groupLink = type === 'group' ? document.getElementById('new-link').value.trim() : '';
+
+  if (!name) { showToast('הכנס שם', true); return; }
+  if (type === 'contact' && !phone) { showToast('הכנס מספר טלפון', true); return; }
+
+  var entry = { id: 'c_' + Date.now(), name: name, type: type };
+  if (type === 'contact') entry.phone = phone;
+  if (type === 'group' && groupLink) entry.groupLink = groupLink;
+
+  contacts.push(entry);
+  saveContacts();
+  document.getElementById('new-name').value = '';
+  document.getElementById('new-phone').value = '';
+  document.getElementById('new-link').value = '';
+  renderContacts();
+  renderRecipients();
+  showToast('✅ נוסף בהצלחה');
+}
+
+function deleteContact(id) {
+  contacts = contacts.filter(function(c) { return c.id !== id; });
+  saveContacts();
+  renderContacts();
+  renderRecipients();
+}
+
+function renderContacts() {
+  var container = document.getElementById('contacts-list');
+  if (contacts.length === 0) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><p>אין אנשי קשר עדיין</p></div>';
+    return;
+  }
+  var byContact = contacts.filter(function(c) { return c.type === 'contact'; });
+  var byGroup = contacts.filter(function(c) { return c.type === 'group'; });
+  var html = '';
+  if (byContact.length > 0) {
+    html += '<div class="section-divider">אנשי קשר (' + byContact.length + ')</div>';
+    html += byContact.map(contactRow).join('');
+  }
+  if (byGroup.length > 0) {
+    html += '<div class="section-divider" style="margin-top:16px">קבוצות (' + byGroup.length + ')</div>';
+    html += byGroup.map(contactRow).join('');
+  }
+  container.innerHTML = html;
+}
+
+function contactRow(c) {
+  var isGroup = c.type === 'group';
+  var subLine = '';
+  if (!isGroup) {
+    subLine = '<div class="contact-phone" style="direction:ltr">' + (c.phone || '') + '</div>';
+  } else if (c.groupLink) {
+    subLine = '<div style="font-size:11px;color:var(--blue)">✓ יש לינק לקבוצה</div>';
+  } else {
+    subLine = '<div style="font-size:11px;color:var(--text-muted)">אין לינק — העתקה ידנית</div>';
+  }
+  return '<div class="contact-row">' +
+    '<div class="avatar ' + c.type + '">' + c.name.charAt(0) + '</div>' +
+    '<div class="contact-info"><div class="contact-name">' + escHtml(c.name) + '</div>' + subLine + '</div>' +
+    '<button class="btn btn-danger btn-sm" onclick="deleteContact(\'' + c.id + '\')">✕</button>' +
+    '</div>';
+}
+
+// ── HELPERS ────────────────────────────────────────────────
+function updatePendingCount() {
+  var count = messages.filter(function(m) { return m.status === 'pending'; }).length;
+  var el = document.getElementById('pending-count');
+  el.innerHTML = count > 0 ? '<span class="count-badge">' + count + '</span>' : '';
+}
+
+function tickCheck() {
+  var now = Date.now();
+  var due = messages.filter(function(m) {
+    return m.status === 'pending' && m.scheduledAt <= now && m.scheduledAt > now - 600000;
+  });
+  if (due.length > 0) {
+    renderList();
+    updatePendingCount();
+    if (Notification.permission === 'granted') {
+      due.forEach(function(msg) {
+        new Notification('📤 הודעה ממתינה לשליחה', {
+          body: msg.text.slice(0,60) + (msg.text.length > 60 ? '...' : '')
+        });
+      });
+    }
+  }
+}
+
+function requestNotificationPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function showToast(msg, isError) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '') + ' show';
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.getElementById('send-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+setInterval(function() {
+  if (document.getElementById('tab-list').classList.contains('active')) renderList();
+}, 60000);
+
+init();
+
+// PWA install prompt
+var deferredPrompt;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install button if not already installed
+  var btn = document.getElementById('install-btn');
+  if (btn) btn.style.display = 'block';
+});
+</script>
+</body>
+</html>
